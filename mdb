@@ -1,4 +1,14 @@
 MDBROOT="/usb"
+if [ ! -r $MDBROOT ]
+then
+	if [ -r $HOME/sandboxes ]
+	then
+		MDBROOT=$HOME
+	else
+		echo Cant find your sandbox directory.
+		exit 2
+	fi
+fi
 export MDBROOT
 MDB=$1
 export MDB

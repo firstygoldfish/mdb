@@ -1,0 +1,39 @@
+MDBROOT="/usb"
+export MDBROOT
+MDB=$1
+export MDB
+if [ $# -ne 1 ]
+then
+	echo "USAGE: . ./mdb sandbox_name"
+	echo "  -=Sandbox list=-"
+	for i in `ls -1 $MDBROOT/sandboxes | grep -v "change_path"`
+	do
+		OP=`$MDBROOT/sandboxes/$i/status`
+		SBNAME=`echo $OP | cut -f1 -d' '`
+		SBSTAT=`echo $OP | cut -f2 -d' '`
+		echo -e " "$SBNAME"\t[Status:"$SBSTAT"]"
+	done
+else
+	echo You are in a new shell setup for sandbox "'"$MDB"'".
+	bash --rcfile <(echo '. ~/.bashrc; MDBHOME=$MDBROOT/sandboxes/$MDB
+	#echo MDBHOME = $MDBHOME
+	if [ -d $MDBHOME ]
+	then
+		MDBPATH=`$MDBHOME/metadata basedir`/bin
+		MDBPORT=`$MDBHOME/metadata port`
+		MDBCFG=$MDBHOME"/my.sandbox.cnf"
+		DEFS="--defaults-file="$MDBHOME"/my.sandbox.cnf"
+		PATH=$PATH:$MDBPATH:$MDBHOME
+		SQL="mysql $DEFS"
+		PS1="(MDB-"$MDB":"$MDBPORT") # "
+		export DEFS PATH PS1 MDBHOME MDBPORT SQL MDBCFG
+		echo  \$PATH \$MDBHOME \$DEFS \$SQL \$MDBCFG configured.
+		echo Type \$SQL or "'"use"'" to run sql.
+		STATUS=`$MDBROOT/sandboxes/$MDB/status | cut -f2 -d" "`
+		[ "$STATUS" = "off" ]&&$MDBROOT/sandboxes/$MDB/start
+		[ "$STATUS" != "off" ]&&echo Sandbox already started. Type stop to shutdown.
+	else
+		echo "Sandbox "$MDB" does NOT exist."
+	fi')
+fi
+
